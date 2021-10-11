@@ -1,77 +1,34 @@
-import os
-import subprocess
-import time
+def isPython(versionNumber): # Check the version of python running
+    import platform
+    return platform.python_version().startswith(str(versionNumber))
 
-origin_path = ''
-# change origin path to the path wich you have stored your locker
-# use this format "C:\\Users\\You"
+def consoleReadLine(message): # Read a string from the console
+    if isPython(3): # Python 3.x code
+        return input(message)
+    else: # Python 2.x code
+        return raw_input(message)
 
-password = "enter your password"
+def consoleWriteLine(message): # Write a string to the console
+    import os, sys
+    sys.stdout.write(str(message) + os.linesep)
 
-
-def lock():
-    """Locks the folder"""
-    print('you are locking')
-    subprocess.run('ren Locker "Control Panel.{21EC2020-3AEA-1069-A2DD-08002B30309D}"', shell=True)
-    subprocess.run('attrib +h +s "Control Panel.{21EC2020-3AEA-1069-A2DD-08002B30309D}"', shell=True)
-
-
-def unlock():
-    """Unlocks the folder"""
-    print("you are unlocking")
-    subprocess.run('attrib -h -s "Control Panel.{21EC2020-3AEA-1069-A2DD-08002B30309D}"', shell=True)
-    subprocess.run('ren "Control Panel.{21EC2020-3AEA-1069-A2DD-08002B30309D}" Locker', shell=True)
-
-
-def md():
-    """Makes new directory if it doesn't already exists"""
-    os.mkdir("Locker")
-    print('New Locker has been made'
-    '\n;)')
-
-
-
-def if_y():    
-    unlock()
-    npath = origin_path
-    npath = os.path.realpath(npath)
-    os.startfile(npath) 
-    time.sleep(0.2)
-
-def main():
-
-    print("Welcome")
-    os.chdir(origin_path)
-    a = os.listdir()
-    
-    
-    if "Control Panel.{21EC2020-3AEA-1069-A2DD-08002B30309D}" in a:
-        Pword = input("enter password\n")
-
-        if Pword == password:
-            inputt = input("Do you want to open your directory now")
-            if inputt == "y":
-                if_y()
-            elif inputt == "yes":
-                if_y()             
-            else:
-                unlock()
-        else:
-            print('wrong password')
-            time.sleep(0.2)
-            exit()
-
-    elif "Locker" in a:
-        lock()
-        time.sleep(0.2)
-
+from platform import system
+operatingSystem = system()
+if operatingSystem == "Windows" or operatingSystem == "Darwin":
+    folderPath = consoleReadLine("Enter the path of the folder you want to hide or unhide: ")
+    command = consoleReadLine("Do you want to hide or unhide '{0}': ".format(folderPath)).upper()
+    from subprocess import call
+    if command == "HIDE":
+        if operatingSystem == "Windows":
+            call(["attrib", "+H", folderPath])
+        elif operatingSystem == "Darwin":
+            call(["chflags", "hidden", folderPath])
+    elif command == "UNHIDE":
+        if operatingSystem == "Windows":
+            call(["attrib", "-H", folderPath])
+        elif operatingSystem == "Darwin":
+            call(["chflags", "nohidden", folderPath])
     else:
-        md()
-        time.sleep(0.2)
-
-
-# Use this 
-# pyinstaller -F -i <icon path> main.py
-# ex -> pyinstaller -F -i Dir\file.ico main.py
-
-main()
+        consoleWriteLine("ERROR: (Incorrect Command) Valid commands are 'HIDE' and 'UNHIDE' (both are not case sensitive)")
+else:
+    consoleWriteLine("ERROR: (Unknown Operating System) Only Windows and Darwin(Mac) are Supported")
